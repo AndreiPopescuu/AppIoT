@@ -1,4 +1,3 @@
-// api/generate-presigned-url.js
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -22,12 +21,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = await req.json();
+    const body = await req.json();  // aici citim body-ul JSON din request
     console.log('Body received:', body);
 
     const { fileName, fileType, folderName } = body;
 
     if (!fileName || !fileType || !folderName) {
+      console.log('Missing params:', { fileName, fileType, folderName });
       return res.status(400).json({ error: 'Missing parameters' });
     }
 
@@ -42,8 +42,7 @@ export default async function handler(req, res) {
     const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
     return res.status(200).json({ url, key });
   } catch (error) {
-    console.error('Error parsing JSON body or generating URL:', error);
-    return res.status(400).json({ error: 'Invalid JSON body or error generating URL' });
+    console.error('Error:', error);
+    return res.status(400).json({ error: 'Invalid JSON or other error' });
   }
 }
-

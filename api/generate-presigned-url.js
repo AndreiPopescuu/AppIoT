@@ -14,35 +14,32 @@ const s3 = new S3Client({
 
 export default async function handler(req, res) {
   console.log('req.method:', req.method);
+  console.log('req.body:', req.body);
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const { fileName, fileType, folderName } = req.body;
+
+  if (!fileName || !fileType || !folderName) {
+    return res.status(400).json({ error: 'Missing parameters' });
+  }
+
+  const key = `${folderName}/${fileName}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: fileType,
+  });
+
   try {
-    const body = await req.json();  // aici citim body-ul JSON din request
-    console.log('Body received:', body);
-
-    const { fileName, fileType, folderName } = body;
-
-    if (!fileName || !fileType || !folderName) {
-      console.log('Missing params:', { fileName, fileType, folderName });
-      return res.status(400).json({ error: 'Missing parameters' });
-    }
-
-    const key = `${folderName}/${fileName}`;
-
-    const command = new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      ContentType: fileType,
-    });
-
     const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
     return res.status(200).json({ url, key });
   } catch (error) {
-    console.error('Error:', error);
-    return res.status(400).json({ error: 'Invalid JSON or other error' });
+    console.error('Error generating presigned URL:', error);
+    return res.status(500).json({ error: 'Could not generate presigned URL' });
   }
 }

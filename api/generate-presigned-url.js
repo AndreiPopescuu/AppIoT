@@ -14,6 +14,8 @@ const s3 = new S3Client({
 });
 
 export default async function handler(req, res) {
+    console.log('req.method:', req.method);
+    console.log('req.body:', req.body);
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });

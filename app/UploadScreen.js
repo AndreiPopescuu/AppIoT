@@ -7,11 +7,12 @@ export default function UploadScreen() {
   const [name, setName] = useState('');
 
   useEffect(() => {
-    fetch('http://192.168.0.200:4000/')
-      .then(res => res.text())
-      .then(text => console.log('Test backend:', text))
-      .catch(err => console.error('Test backend error:', err));
-  }, []);
+  fetch('https://iotapp-five.vercel.app/')
+    .then(res => res.text())
+    .then(text => console.log('Test backend:', text))
+    .catch(err => console.error('Test backend error:', err));
+}, []);
+
 
   useEffect(() => {
     (async () => {
@@ -78,7 +79,7 @@ export default function UploadScreen() {
       console.log('folderName:', folderName);
 
       console.log('Cerere generare URL pre-semnat...');
-      const response = await fetch('http://192.168.0.200:4000/generate-presigned-url', {
+      const response = await fetch('https://iotapp-five.vercel.app/api/generate-presigned-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

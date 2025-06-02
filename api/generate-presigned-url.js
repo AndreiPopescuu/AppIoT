@@ -14,19 +14,31 @@ const s3 = new S3Client({
 
 export default async function handler(req, res) {
   console.log('req.method:', req.method);
-  console.log('req.body:', req.body);
 
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { fileName, fileType, folderName } = req.body;
+  let body;
+  try {
+    if (typeof req.body === 'string') {
+      body = JSON.parse(req.body);
+    } else {
+      body = req.body;
+    }
+  } catch (e) {
+    console.error('Error parsing req.body:', e);
+    return res.status(400).json({ error: 'Invalid JSON' });
+  }
+
+  const { fileName, fileType, folderName } = body;
 
   if (!fileName || !fileType || !folderName) {
     return res.status(400).json({ error: 'Missing parameters' });
   }
 
+  // restul codului rămâne la fel
   const key = `${folderName}/${fileName}`;
 
   const command = new PutObjectCommand({
